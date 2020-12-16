@@ -60,7 +60,7 @@ def sskernel(x, tin=None, W=None, nbs=1e3):
         T = np.max(x) - np.min(x)
         dx = np.sort(np.diff(np.sort(x)))
         dt_samp = dx[np.nonzero(dx)][0]
-        tin = np.linspace(np.min(x), np.max(x), min(np.ceil(T / dt_samp), 1e3))
+        tin = np.linspace(np.min(x), np.max(x), min(np.ceil(T / dt_samp).astype(np.int), np.int(1e3)))
         t = tin
         x_ab = x[(x >= min(tin)) & (x <= max(tin))]
     else:
@@ -88,7 +88,8 @@ def sskernel(x, tin=None, W=None, nbs=1e3):
         C_min = np.Inf
         for k, w in enumerate(W):
             C[k], yh = CostFunction(y_hist, N, w, dt)
-            if(C[k] < C_min):
+            print(f'{C[k]=} :: {C_min=}')
+            if C[k] < C_min:
                 C_min = C[k]
                 optw = w
                 y = yh
@@ -136,7 +137,7 @@ def sskernel(x, tin=None, W=None, nbs=1e3):
         W = W[0:k]
 
     # estimate confidence intervals by bootstrapping
-    nbs = np.asarray(nbs)
+    nbs = np.asarray(nbs, dtype=np.int)
     yb = np.zeros((nbs, len(tin)))
     for i in range(nbs):
         idx = np.random.randint(0, len(x_ab)-1, len(x_ab))
@@ -176,6 +177,7 @@ def fftkernel(x, w):
     L = x.size
     Lmax = L + 3 * w
     n = 2 ** np.ceil(np.log2(Lmax))
+    n = n.astype(np.int)
 
     X = np.fft.fft(x, n.astype(np.int))
 

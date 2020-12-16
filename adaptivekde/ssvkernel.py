@@ -76,7 +76,7 @@ def ssvkernel(x, tin=None, M=80, nbs=1e2, WinFunc='Boxcar'):
         T = np.max(x) - np.min(x)
         dx = np.sort(np.diff(np.sort(x)))
         dt_samp = dx[np.nonzero(dx)][0]
-        tin = np.linspace(np.min(x), np.max(x), min(np.ceil(T / dt_samp), 1e3))
+        tin = np.linspace(np.min(x), np.max(x), min(np.ceil(T / dt_samp).astype(np.int), int(1e3)))
         t = tin
         x_ab = x[(x >= min(tin)) & (x <= max(tin))]
     else:
@@ -160,7 +160,7 @@ def ssvkernel(x, tin=None, M=80, nbs=1e2, WinFunc='Boxcar'):
     C = C[0:k]
 
     # estimate confidence intervals by bootstrapping
-    nbs = np.asarray(nbs)
+    nbs = np.asarray(nbs, dtype=np.int)
     yb = np.zeros((nbs, tin.size))
     for i in range(nbs):
         Nb = np.random.poisson(lam=N)
@@ -237,8 +237,11 @@ def fftkernel(x, w):
     # forward padded transform
     L = x.size
     Lmax = L + 3 * w
+    # n = 2 ** np.ceil(np.log2(Lmax))
+    # X = np.fft.fft(x, n.astype(np.int))
     n = 2 ** np.ceil(np.log2(Lmax))
-    X = np.fft.fft(x, n.astype(np.int))
+    n = n.astype(np.int)
+    X = np.fft.fft(x, n)
 
     # generate kernel domain
     f = np.linspace(0, n-1, n) / n
@@ -259,8 +262,11 @@ def fftkernelWin(x, w, WinFunc):
     # forward padded transform
     L = x.size
     Lmax = L + 3 * w
+    # n = 2 ** np.ceil(np.log2(Lmax))
+    # X = np.fft.fft(x, n.astype(np.int))
     n = 2 ** np.ceil(np.log2(Lmax))
-    X = np.fft.fft(x, n.astype(np.int))
+    n = n.astype(np.int)
+    X = np.fft.fft(x, n)
 
     # generate kernel domain
     f = np.linspace(0, n-1, n) / n
